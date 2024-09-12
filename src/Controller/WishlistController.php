@@ -11,12 +11,12 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class WishlistController extends AbstractController
 {
-    #[Route('/wishlist', name: 'app_wishlist')]
-    public function index(): Response
+    #[Route('/wishlist', name: 'wishlist')]
+    public function showWishlist(EntityManagerInterface $entityManager):Response
     {
-        return $this->render('wishlist/index.html.twig', [
-            'controller_name' => 'WishlistController',
-        ]);
+        $user = $this->getUser();
+        $wishlist = $entityManager->getRepository(Wishlist::class)->findBy(['user' => $user]);
+        return $this->render('wishlist/index.html.twig', ['wishlists' => $wishlist]);
     }
 
 

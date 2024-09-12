@@ -2,7 +2,7 @@
 <div class="container">
     <img src="{{ game.image }}" alt="{{ game.title }}" style="max-width: 100%; height: auto;">
 </div>
-<p>Release date: {{ game.release_date }}</p>
+<p>Release date: {{ game.releasedate|date('F j, Y') }}</p>
 <p>Publisher: {{ game.publisher }}</p>
 <p>Genre: {{ game.genre }}</p>
 <p>{{ game.description }}</p>
@@ -16,7 +16,7 @@
                 <p>Rating (out of 5): {{ review.rating }}</p>
                 <p>{{ review.comment }}</p>
                 <small>Reviewed on {{ review.createdAt|date('F j, Y') }}</small>
-                <small>Last updated on {{ review.updatedAt }}</small>
+                <small>Last updated on {{ review.updatedAt|date('F j, Y')}}</small>
             </li>
         {% endfor %}
     </ul>
@@ -24,5 +24,5 @@
     <p>No reviews yet.</p>
 {% endif %}
 
-<a href="{{ path('/wishlist/add/{game.title}') }}">Add to wishlist</a>
-<a href="{{ path('/game/{game.title}/add-review') }}">Add review</a>
+<a href="{{ path('add_wishlist', { title: game.title }) }}">Add to wishlist</a>
+<a href="{{ path('add_review', { title: game.title }) }}">Add review</a>

@@ -1,0 +1,16 @@
+
+
+<h1>Welcome to GameHub</h1>
+
+<h2>Featured Games</h2>
+<div class="game-list">
+    {% for game in randomGames %}
+        <div class="game-item">
+            <h3><a href="{{ path('app_game', { title: game.title }) }}">{{ game.title }}</a></h3>
+            <img src="{{ game.image }}" alt="{{ game.title }}" style="max-width: 100%; height: auto;">
+            <p>{{ game.price }}</p>
+        </div>
+    {% else %}
+        <p>No games available.</p>
+    {% endfor %}
+</div>

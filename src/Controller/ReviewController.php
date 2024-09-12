@@ -20,8 +20,8 @@ class ReviewController extends AbstractController
         ]);
     }
     #[Route('/game/{title}/add-review', name: 'add_review')]
-    public function addReview(Game $game, Request $request, EntityManagerInterface $entityManager): Response
-    {
+    public function addReview(string $title, Request $request, EntityManagerInterface $entityManager): Response
+    {   $game=$entityManager->getRepository(Game::class)->findOneBy(['title'=>$title]);
         $user = $this->getUser();
 
         $existingReview = $entityManager->getRepository(Review::class)->findOneBy([
