@@ -1,0 +1,42 @@
+{# templates/cart/cart.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Your Cart{% endblock %}
+
+{% block body %}
+    <h1>Your Cart</h1>
+    {% if message is not empty %}
+        <div class="alert alert-info">
+            {{ message }}
+        </div>
+    {% endif %}
+    {% if items is not empty %}
+        <table>
+            <thead>
+            <tr>
+                <th>Game</th>
+                <th>Price</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in items %}
+                <tr>
+                    <td>{{ item.game.title }}</td>
+                    <td>${{ item.game.price }}</td>
+                    <td>
+                        <a href="{{ path('remove_cart', { title: item.game.title }) }}"
+                           onclick="return confirm('Are you sure you want to remove this game from your cart?');">
+                            Remove
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Your cart is empty.</p>
+    {% endif %}
+
+    <a href="{{ path('app_store') }}">Continue Shopping</a>
+{% endblock %}

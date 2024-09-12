@@ -16,7 +16,7 @@ class WishlistController extends AbstractController
     {
         $user = $this->getUser();
         $wishlist = $entityManager->getRepository(Wishlist::class)->findBy(['user' => $user]);
-        return $this->render('wishlist/index.html.twig', ['wishlists' => $wishlist]);
+        return $this->render('wishlist/cart.html.twig', ['wishlists' => $wishlist]);
     }
 
 

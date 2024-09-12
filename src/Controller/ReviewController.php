@@ -12,13 +12,6 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class ReviewController extends AbstractController
 {
-    #[Route('/review', name: 'app_review')]
-    public function index(): Response
-    {
-        return $this->render('review/index.html.twig', [
-            'controller_name' => 'ReviewController',
-        ]);
-    }
     #[Route('/game/{title}/add-review', name: 'add_review')]
     public function addReview(string $title, Request $request, EntityManagerInterface $entityManager): Response
     {   $game=$entityManager->getRepository(Game::class)->findOneBy(['title'=>$title]);
