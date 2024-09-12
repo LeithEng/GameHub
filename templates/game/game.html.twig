@@ -1,0 +1,28 @@
+<h1>{{ game.title }}</h1>
+<div class="container">
+    <img src="{{ game.image }}" alt="{{ game.title }}" style="max-width: 100%; height: auto;">
+</div>
+<p>Release date: {{ game.release_date }}</p>
+<p>Publisher: {{ game.publisher }}</p>
+<p>Genre: {{ game.genre }}</p>
+<p>{{ game.description }}</p>
+<p>Price: {{ game.price }}</p>
+<h2>Reviews</h2>
+{% if reviews is not empty %}
+    <ul>
+        {% for review in reviews %}
+            <li>
+                <strong>{{ review.username }}:</strong>
+                <p>Rating (out of 5): {{ review.rating }}</p>
+                <p>{{ review.comment }}</p>
+                <small>Reviewed on {{ review.createdAt|date('F j, Y') }}</small>
+                <small>Last updated on {{ review.updatedAt }}</small>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No reviews yet.</p>
+{% endif %}
+
+<a href="{{ path('/wishlist/add/{game.title}') }}">Add to wishlist</a>
+<a href="{{ path('/game/{game.title}/add-review') }}">Add review</a>

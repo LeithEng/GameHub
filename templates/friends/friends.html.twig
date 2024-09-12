@@ -1,0 +1,42 @@
+<h1>Your Friends and Requests</h1>
+
+<h2>Friends</h2>
+{% if friends is not empty %}
+    <ul>
+        {% for friend in friends %}
+            <li>
+                {{ friend.user1.username }} (Status: {{ friend.status }})
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>You have no friends yet.</p>
+{% endif %}
+
+<h2>Sent Requests</h2>
+{% if sentRequests is not empty %}
+    <ul>
+        {% for request in sentRequests %}
+            <li>
+                Sent to: {{ request.user2.username }} (Status: {{ request.status }})
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>You have no sent requests.</p>
+{% endif %}
+
+<h2>Received Requests</h2>
+{% if receivedRequests is not empty %}
+    <ul>
+        {% for request in receivedRequests %}
+            <li>
+                Received from: {{ request.user1.username }} (Status: {{ request.status }})
+                <a href="{{ path('accept_request', { id: request.id }) }}">Accept</a>
+                <a href="{{ path('reject_request', { id: request.id }) }}">Reject</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>You have no received requests.</p>
+{% endif %}

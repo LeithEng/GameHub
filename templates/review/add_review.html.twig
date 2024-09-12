@@ -1,0 +1,8 @@
+
+<h1>Add Review for {{ game.name }}</h1>
+
+{{ form_start(form) }}
+    {{ form_row(form.rating) }}
+    {{ form_row(form.comment) }}
+<button type="submit">Submit Review</button>
+{{ form_end(form) }}
