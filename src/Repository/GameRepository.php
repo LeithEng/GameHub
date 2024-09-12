@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Game;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -70,4 +71,53 @@ class GameRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findByFilters(array $filters): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('g');
+
+        if (isset($filters['genre'])) {
+            $qb->andWhere('g.genre = :genre')
+                ->setParameter('genre', $filters['genre']);
+        }
+
+        if (isset($filters['publisher'])) {
+            $qb->andWhere('g.publisher = :publisher')
+                ->setParameter('publisher', $filters['publisher']);
+        }
+
+        if (isset($filters['price_min']) && isset($filters['price_max'])) {
+            $qb->andWhere('g.price BETWEEN :price_min AND :price_max')
+                ->setParameter('price_min', $filters['price_min'])
+                ->setParameter('price_max', $filters['price_max']);
+        } elseif (isset($filters['price_min'])) {
+            $qb->andWhere('g.price >= :price_min')
+                ->setParameter('price_min', $filters['price_min']);
+        } elseif (isset($filters['price_max'])) {
+            $qb->andWhere('g.price <= :price_max')
+                ->setParameter('price_max', $filters['price_max']);
+        }
+
+
+
+        return $qb;
+    }
+
+
+    public function getGenres(): array
+    {
+        return array_column($this->createQueryBuilder('g')
+            ->select('DISTINCT g.genre')
+            ->getQuery()
+            ->getScalarResult(), 'genre');
+    }
+
+    public function getPublishers(): array
+    {
+        return array_column($this->createQueryBuilder('g')
+            ->select('DISTINCT g.publisher')
+            ->getQuery()
+            ->getScalarResult(), 'publisher');
+    }
+
 }

@@ -1,0 +1,48 @@
+
+<h1>Game Store</h1>
+
+<form method="get" action="{{ path('app_store') }}">
+    <div>
+        <label for="genre">Genre:</label>
+        <select id="genre" name="genre">
+            <option value="">All</option>
+            {% for genre in genres %}
+                <option value="{{ genre }}" {% if genre == app.request.query.get('genre') %}selected{% endif %}>{{ genre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <label for="publisher">Publisher:</label>
+        <select id="publisher" name="publisher">
+            <option value="">All</option>
+            {% for publisher in publishers %}
+                <option value="{{ publisher }}" {% if publisher == app.request.query.get('publisher') %}selected{% endif %}>{{ publisher }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <label for="price">Price Range:</label>
+        <select id="price" name="price">
+            <option value="">All</option>
+            <option value="0-10" {% if app.request.query.get('price') == '0-10' %}selected{% endif %}>$0 - $10</option>
+            <option value="10-20" {% if app.request.query.get('price') == '10-20' %}selected{% endif %}>$10 - $20</option>
+            <option value="20-30" {% if app.request.query.get('price') == '20-30' %}selected{% endif %}>$20 - $30</option>
+            <option value="30-50" {% if app.request.query.get('price') == '30-50' %}selected{% endif %}>$30 - $50</option>
+            <option value="50+" {% if app.request.query.get('price') == '50+' %}selected{% endif %}>$50+</option>
+        </select>
+    </div>
+    <button type="submit">Filter</button>
+</form>
+
+<h2>All Games</h2>
+<div class="game-list">
+    {% for game in games %}
+        <div class="game-item">
+            <h3><a href="{{ path('app_game', { title: game.title }) }}">{{ game.title }}</a></h3>
+            <img src="{{ game.image }}" alt="{{ game.title }}" style="max-width: 100%; height: auto;">
+            <p>{{ game.price }}</p>
+        </div>
+    {% else %}
+        <p>No games available.</p>
+    {% endfor %}
+</div>
