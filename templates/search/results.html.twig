@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    {% include ('navbar/navbar.html.twig' )%}
+    <h1>Search Results for "{{ query }}"</h1>
+
+    {% if games is empty %}
+        <p>No games found.</p>
+    {% else %}
+        <ul>
+            {% for game in games %}
+                <li>
+                    <a href="{{ path('app_game', {'title': game.title}) }}">{{ game.title }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

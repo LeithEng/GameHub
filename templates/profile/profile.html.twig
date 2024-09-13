@@ -1,6 +1,7 @@
 {% block title %}Profile{% endblock %}
 
 {% block body %}
+    {% include ('navbar/navbar.html.twig' )%}
     <h1>Your Profile</h1>
     <p>Username: {{ username }}</p>
     <p>Email: {{ email }}</p>

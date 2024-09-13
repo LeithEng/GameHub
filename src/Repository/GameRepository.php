@@ -119,5 +119,12 @@ class GameRepository extends ServiceEntityRepository
             ->getQuery()
             ->getScalarResult(), 'publisher');
     }
-
+    public function findByQuery(string $query)
+    {
+        return $this->createQueryBuilder('g')
+            ->where('g.title LIKE :query')
+            ->setParameter('query', '%' . $query . '%')
+            ->getQuery()
+            ->getResult();
+    }
 }
