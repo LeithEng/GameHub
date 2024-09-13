@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Library;
 use App\Entity\User;
 use App\Form\RegistrationType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,7 +30,10 @@ class RegistrationController extends AbstractController
                 )
             );
             $user->setRoles(['ROLE_USER']);
-
+            $library = new Library();
+            $library->setUser($user);
+            $user->setLibrary($library);
+            $entityManager->persist($library);
             $entityManager->persist($user);
             $entityManager->flush();
 

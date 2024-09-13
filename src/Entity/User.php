@@ -57,6 +57,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?Cart $cart = null;
 
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?Library $library = null;
+
+
+
+
     public function __construct()
     {
         $this->friendships = new ArrayCollection();
@@ -248,12 +254,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setCart(?Cart $cart): static
     {
-        // unset the owning side of the relation if necessary
+
         if ($cart === null && $this->cart !== null) {
             $this->cart->setUser(null);
         }
 
-        // set the owning side of the relation if necessary
+
         if ($cart !== null && $cart->getUser() !== $this) {
             $cart->setUser($this);
         }
@@ -262,4 +268,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    public function getLibrary(): ?Library
+    {
+        return $this->library;
+    }
+
+    public function setLibrary(Library $library): static
+    {
+        // set the owning side of the relation if necessary
+        if ($library->getUser() !== $this) {
+            $library->setUser($this);
+        }
+
+        $this->library = $library;
+
+        return $this;
+    }
+
+
+
+
+
 }

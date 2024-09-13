@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Library{% endblock %}
+
+{% block body %}
+    <h1>Your Library</h1>
+
+    {% if libraryGames is not empty %}
+        <ul>
+            {% for entry in libraryGames %}
+                <li>
+                    {{ entry.title }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Your library is empty!</p>
+    {% endif %}
+{% endblock %}

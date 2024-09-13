@@ -1,0 +1,9 @@
+{% block title %}Profile{% endblock %}
+
+{% block body %}
+    <h1>Your Profile</h1>
+    <p>Username: {{ username }}</p>
+    <p>Email: {{ email }}</p>
+    <a href="{{ path ('change_pwd') }}">Change your password</a>
+
+{% endblock %}
