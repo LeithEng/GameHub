@@ -1,0 +1,10 @@
+{% block title %}User Profile{% endblock %}
+
+{% block body %}
+    {% include ('navbar/navbar.html.twig' )%}
+    <h1>{{ username }} Profile</h1>
+    <p>Username: {{ username }}</p>
+    <p>Email: {{ email }}</p>
+    <a href="{{ path('send_request', { username: user.username }) }}" class="btn btn-success">Send Friend Request</a>
+
+{% endblock %}

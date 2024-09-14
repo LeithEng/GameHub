@@ -4,6 +4,7 @@ namespace App\Controller;
 use App\Entity\Library;
 use App\Entity\User;
 use App\Form\ChangePasswordType;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,7 +46,7 @@ class ProfileController extends AbstractController
         return $this->render('profile/change_password.html.twig', ['PasswordForm' => $form->createView()]);
 
     }
-    // src/Controller/ProfileController.php
+
 
     #[Route('/profile/library', name: 'profile_library')]
     public function showLibrary(EntityManagerInterface $entityManager): Response
@@ -56,6 +57,25 @@ class ProfileController extends AbstractController
 
         return $this->render('library/library.html.twig', [
             'libraryGames' => $libraryGames,
+        ]);
+    }
+
+    #[Route('/profile/{id}', name: 'profile_page')]
+    public function checkProfile($id, UserRepository $userRepository)
+    {
+        $user = $userRepository->find($id);
+
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+
+        $username=$user->getUsername();
+        $email=$user->getEmail();
+
+        return $this->render('profile/user_profile.html.twig', [
+            'user' => $user,
+            'username' => $username,
+            'email' => $email,
         ]);
     }
 

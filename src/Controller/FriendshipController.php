@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Friendship;
 use App\Entity\User;
+use App\Form\UserSearchType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,11 +17,12 @@ class FriendshipController extends AbstractController
 
  #[Route(path:"/send-request/{username}", name:"send_request")]
 
-public function sendFriendRequest(User $user2, EntityManagerInterface $entityManager): Response
+public function sendFriendRequest(string $username,EntityManagerInterface $entityManager): Response
 {
 $user1 = $this->getUser();
+$userRepository = $entityManager->getRepository(User::class);
+$user2= $userRepository->findOneBy(['username' => $username]);
 
-// Check if friendship already exists
 $existingFriendship = $entityManager->getRepository(Friendship::class)->findOneBy([
 'user1' => $user1,
 'user2' => $user2,
@@ -42,11 +44,17 @@ return new Response('Friend request sent successfully!');
 }
 
 #[Route(path:"/accept-request/{username}", name:"accept_request")]
-public function acceptFriendRequest(Friendship $friendship, EntityManagerInterface $entityManager): Response
+public function acceptFriendRequest(string $username, EntityManagerInterface $entityManager): Response
 {
-
-    if ($friendship->getUser2() !== $this->getUser() || $friendship->getStatus() !== 'pending') {
-        return new Response('You cannot accept this request.', 400);
+    $user2 = $this->getUser();
+    $friendship = $entityManager->getRepository(Friendship::class)
+        ->findOneBy([
+            'user2' => $user2,
+            'user1' => $entityManager->getRepository(User::class)->findOneByUsername($username),
+            'status' => 'pending'
+        ]);
+    if (!$friendship) {
+        return new Response('Friendship not found or request is not pending.', 400);
     }
 
     $friendship->setStatus('accepted');
@@ -55,24 +63,40 @@ public function acceptFriendRequest(Friendship $friendship, EntityManagerInterfa
     return new Response('Friend request accepted!');
 }
 
-#[Route(path:"/reject-request/{username}", name:"reject_request")]
+    #[Route(path:"/reject-request/{username}", name:"reject_request")]
+    public function rejectFriendRequest(string $username, EntityManagerInterface $entityManager): Response
+    {
+        $user2 = $this->getUser(); // The current authenticated user
 
-public function rejectFriendRequest(Friendship $friendship, EntityManagerInterface $entityManager): Response
-{
-    if ($friendship->getUser2() !== $this->getUser() || $friendship->getStatus() !== 'pending') {
-        return new Response('You cannot reject this request.', 400);
+        // Fetch the friendship based on the username and current user
+        $friendship = $entityManager->getRepository(Friendship::class)
+            ->findOneBy([
+                'user2' => $user2,
+                'user1' => $entityManager->getRepository(User::class)->findOneByUsername($username),
+                'status' => 'pending'
+            ]);
+
+        if (!$friendship) {
+            return new Response('Friendship not found or request is not pending.', 400);
+        }
+
+        $entityManager->remove($friendship);
+        $entityManager->flush();
+
+        return new Response('Friend request rejected!');
     }
 
-    $entityManager->remove($friendship);
-    $entityManager->flush();
-
-    return new Response('Friend request rejected!');
-}
-
 #[Route(path:"/friends", name:"friends")]
-public function Friends(EntityManagerInterface $entityManager): Response
+public function Friends(EntityManagerInterface $entityManager, Request $request, UserRepository $userRepository): Response
 {   $user=$this->getUser();
-    $friendships = $entityManager->getRepository(Friendship::class)->findBy(['user1' => $user]);
+    $repository = $entityManager->getRepository(Friendship::class);
+
+    $queryBuilder = $repository->createQueryBuilder('f')
+        ->where('f.user1 = :user')
+        ->orWhere('f.user2 = :user')
+        ->setParameter('user', $user);
+
+    $friendships = $queryBuilder->getQuery()->getResult();
     $friends = [];
     $sentRequests = [];
     $receivedRequests = [];
@@ -88,11 +112,23 @@ public function Friends(EntityManagerInterface $entityManager): Response
             }
         }
     }
+    $form = $this->createForm(UserSearchType::class);
+    $form->handleRequest($request);
+
+    $users = [];
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $username = $form->get('username')->getData();
+        $users = $userRepository->findBy(['username' => $username]);
+    }
+
 
     return $this->render('friends/friends.html.twig', [
         'friends' => $friends,
         'sentRequests' => $sentRequests,
         'receivedRequests' => $receivedRequests,
+        'users'=> $users,
+        'form'=> $form
     ]);
 
 }

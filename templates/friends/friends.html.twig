@@ -7,7 +7,12 @@
     <ul>
         {% for friend in friends %}
             <li>
-                {{ friend.user1.username }} (Status: {{ friend.status }})
+                {% if friend.user1 == app.user %}
+                    {{ friend.user2.username }} <!-- Show user2's name if user1 is the current user -->
+                {% else %}
+                    {{ friend.user1.username }} <!-- Show user1's name if user2 is the current user -->
+                {% endif %}
+
             </li>
         {% endfor %}
     </ul>
@@ -34,11 +39,28 @@
         {% for request in receivedRequests %}
             <li>
                 Received from: {{ request.user1.username }} (Status: {{ request.status }})
-                <a href="{{ path('accept_request', { id: request.id }) }}">Accept</a>
-                <a href="{{ path('reject_request', { id: request.id }) }}">Reject</a>
+                <a href="{{ path('accept_request', { username: request.user1.username }) }}">Accept</a>
+                <a href="{{ path('reject_request', { username: request.user1.username }) }}">Reject</a>
             </li>
         {% endfor %}
     </ul>
 {% else %}
     <p>You have no received requests.</p>
+{% endif %}
+{{ form_start(form) }}
+    {{ form_widget(form) }}
+{{ form_end(form) }}
+
+{% if users is not empty %}
+    <ul>
+        {% for user in users %}
+            <li>
+                {{ user.username }}
+                <a href="{{ path('profile_page', { id: user.id }) }}">View Profile</a>
+                <a href="{{ path('send_request', { username: user.username }) }}" class="btn btn-success">Send Friend Request</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No users found</p>
 {% endif %}
