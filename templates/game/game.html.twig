@@ -17,8 +17,12 @@
                 <strong>{{ review.username }}:</strong>
                 <p>Rating (out of 5): {{ review.rating }}</p>
                 <p>{{ review.comment }}</p>
-                <small>Reviewed on {{ review.createdAt|date('F j, Y') }}</small>
-                <small>Last updated on {{ review.updatedAt|date('F j, Y')}}</small>
+                <small>Reviewed on {{ review.createdAt|date('F j, Y H:i') }}</small><br>
+                <small>Last updated on {{ review.updatedAt|date('F j, Y H:i') }}</small>
+                {% if review.user == app.user %}
+                    <a href="{{ path('edit_review', { title: game.title, id: review.id }) }}">Edit</a>
+                    <a href="{{ path('delete_review', { title: game.title, id: review.id }) }}" onclick="return confirm('Are you sure you want to delete this review?');">Delete</a>
+                {% endif %}
             </li>
         {% endfor %}
     </ul>

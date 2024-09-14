@@ -6,6 +6,7 @@
     <div>
         <h3>{{ wishlist.game.title }}</h3>
         <p>{{ wishlist.game.description }}</p>
+        <a href="{{ path('app_game', { title: wishlist.game.title }) }}">Go to the game's page</a>
         <a href="{{ path('remove_wishlist', { title: wishlist.game.title }) }}">Remove</a>
     </div>
 {% endfor %}

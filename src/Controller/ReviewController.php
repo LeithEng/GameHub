@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Game;
 use App\Entity\Review;
+use App\Form\ReviewType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,7 +40,7 @@ class ReviewController extends AbstractController
             $entityManager->persist($review);
             $entityManager->flush();
 
-            return $this->redirectToRoute('game', ['id' => $game->getId()]);
+            return $this->redirectToRoute('app_game', ['title' => $game->getTitle()]);
         }
 
         return $this->render('review/add_review.html.twig', [
@@ -48,11 +49,14 @@ class ReviewController extends AbstractController
         ]);
     }
 
-    #[Route('/review/{id}/edit', name: 'edit_review')]
-    public function editReview(Review $review, Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/game/{title}/review/{id}/edit', name: 'edit_review')]
+    public function editReview(string $title, int $id, Request $request, EntityManagerInterface $entityManager): Response
     {
-        if ($review->getUser() !== $this->getUser()) {
-            return new Response('You cannot edit this review.', 403);
+        $game = $entityManager->getRepository(Game::class)->findOneBy(['title' => $title]);
+        $review = $entityManager->getRepository(Review::class)->find($id);
+
+        if (!$review || $review->getUser() !== $this->getUser()) {
+            return new Response('Review not found or you do not have permission to edit this review.', 403);
         }
 
         $form = $this->createForm(ReviewType::class, $review);
@@ -62,25 +66,30 @@ class ReviewController extends AbstractController
             $review->setUpdatedAt(new \DateTimeImmutable());
             $entityManager->flush();
 
-            return $this->redirectToRoute('game', ['id' => $review->getGame()->getId()]);
+            return $this->redirectToRoute('app_game', ['title' => $game->getTitle()]);
         }
 
-        return $this->render('review/edit_review.html.twig', [
+        return $this->render('review/add_review.html.twig', [
             'form' => $form->createView(),
-            'game' => $review->getGame(),
+            'game' => $game,
         ]);
     }
-    #[Route('/review/{id}/delete', name: 'delete_review')]
-    public function deleteReview(Review $review, EntityManagerInterface $entityManager): Response
+
+
+    #[Route('/game/{title}/review/{id}/delete', name: 'delete_review')]
+    public function deleteReview(string $title, int $id, EntityManagerInterface $entityManager): Response
     {
-        if ($review->getUser() !== $this->getUser()) {
-            return new Response('You cannot delete this review.', 403);
+        $review = $entityManager->getRepository(Review::class)->find($id);
+
+        if (!$review || $review->getUser() !== $this->getUser()) {
+            return new Response('Review not found or you do not have permission to delete this review.', 403);
         }
 
         $entityManager->remove($review);
         $entityManager->flush();
 
-        return $this->redirectToRoute('game_detail', ['id' => $review->getGame()->getId()]);
+        return $this->redirectToRoute('app_game', ['title' => $title]);
     }
+
 
 }
