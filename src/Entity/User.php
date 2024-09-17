@@ -60,6 +60,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?Library $library = null;
 
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?Wallet $wallet = null;
+
 
 
 
@@ -284,6 +287,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->library = $library;
 
         return $this;
+    }
+
+    public function getWallet(): ?Wallet
+    {
+        return $this->wallet;
+    }
+
+    public function setWallet(Wallet $wallet): static
+    {
+        if ($wallet->getUser() !== $this) {
+            $wallet->setUser($this);
+        }
+
+        $this->wallet = $wallet;
+
+        return $this;
+    }
+
+    public function addFunds(string $amount): static
+    {
+        $wallet = $this->getWallet();
+        $balance = $wallet->getBalance();
+        $new=bcadd($balance, $amount,2);
+        $wallet->setBalance($new);
+        return $this;
+
     }
 
 

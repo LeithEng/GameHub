@@ -5,6 +5,8 @@
     <h1>Your Profile</h1>
     <p>Username: {{ username }}</p>
     <p>Email: {{ email }}</p>
+    <h2>Wallet balance: {{ wallet.balance }}</h2>
+    <a href="{{ path('redeem_gift_card') }}">Redeem a gift card</a>
     <a href="{{ path ('change_pwd') }}">Change your password</a>
 
 {% endblock %}

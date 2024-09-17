@@ -6,6 +6,7 @@ use App\Entity\CartItem;
 use App\Entity\Game;
 use App\Entity\Library;
 use App\Entity\User;
+use App\Entity\Wallet;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -102,6 +103,7 @@ class CartController extends AbstractController
     public function payment(Request $request, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
+        $wallet=$user->getWallet();
         $cart = $entityManager->getRepository(Cart::class)->findOneBy(['user' => $user]);
         if (!$cart) {
             $this->addFlash('error', 'Cart not found');
@@ -110,7 +112,15 @@ class CartController extends AbstractController
 
         $library = $entityManager->getRepository(Library::class)->findOneBy(['user' => $user]);
         $items = $entityManager->getRepository(CartItem::class)->findBy(['cart' => $cart]);
-
+        $totalPrice = array_reduce($items, function ($carry, $item) {
+            return $carry + $item->getGame()->getPrice();
+        }, 0);
+        if (bccomp($wallet->getBalance(), $totalPrice, 2) < 0) {
+            $this->addFlash('error', 'Insufficient funds. Please add more money to your wallet.');
+            return $this->redirectToRoute('payment_failed');
+        }
+        $newBalance = bcsub($wallet->getBalance(), $totalPrice, 2);
+        $wallet->setBalance($newBalance);
         foreach ($items as $item) {
             $game = $item->getGame();
             if (!$library->getGames()->contains($game)) {
@@ -132,5 +142,10 @@ class CartController extends AbstractController
             'message' => 'Payment successful! Thank you for your purchase.',
         ]);
     }
-
+    #[Route('/payment/failed', name: 'payment_failed')]
+    public function paymentFailed(): Response
+    {
+        return $this->render('cart/payment_failed.html.twig', [
+        ]);
+    }
 }

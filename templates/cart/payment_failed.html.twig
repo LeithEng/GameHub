@@ -1,0 +1,7 @@
+{% block title %}Payment Success{% endblock %}
+{% block body %}
+    <h1>Payment Failed!</h1>
+    <p>You don't have enough funds in your wallet to afford your cart's content!</p>
+    <a href="{{ path('profile') }}">Go to your profile</a>
+    <a href="{{ path('redeem_gift_card') }}">Redeem a gift card</a>
+{% endblock %}

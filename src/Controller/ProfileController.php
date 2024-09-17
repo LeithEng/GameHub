@@ -20,7 +20,8 @@ class ProfileController extends AbstractController
         $user = $this->getUser();
         $username = $user->getUsername();
         $email = $user->getEmail();
-        return $this->render('profile/profile.html.twig', ['username' => $username, 'email' => $email]);
+        $wallet = $user->getWallet();
+        return $this->render('profile/profile.html.twig', ['username' => $username, 'email' => $email, 'wallet' => $wallet]);
     }
 
     #[Route('/profile/change-password', name: 'change_pwd')]
