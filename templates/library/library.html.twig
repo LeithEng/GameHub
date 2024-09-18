@@ -11,6 +11,7 @@
             {% for entry in libraryGames %}
                 <li>
                     {{ entry.title }}
+                    <a href="{{ path('app_game', { title: entry.title }) }}">Go to the game's page</a>
                 </li>
             {% endfor %}
         </ul>

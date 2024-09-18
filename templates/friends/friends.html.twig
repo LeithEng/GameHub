@@ -8,11 +8,12 @@
         {% for friend in friends %}
             <li>
                 {% if friend.user1 == app.user %}
-                    {{ friend.user2.username }} <!-- Show user2's name if user1 is the current user -->
+                    {{ friend.user2.username }}
+                    <a href="{{ path('profile_page', { id: friend.user2.id }) }}">Check profile</a>
                 {% else %}
-                    {{ friend.user1.username }} <!-- Show user1's name if user2 is the current user -->
+                    {{ friend.user1.username }}
+                    <a href="{{ path('profile_page', { id: friend.user1.id }) }}">Check profile</a>
                 {% endif %}
-
             </li>
         {% endfor %}
     </ul>
