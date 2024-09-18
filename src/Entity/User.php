@@ -63,6 +63,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?Wallet $wallet = null;
 
+    #[ORM\Column]
+    private ?bool $banned = null;
+
 
 
 
@@ -314,6 +317,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
 
     }
+
+    public function isBanned(): ?bool
+    {
+        return $this->banned;
+    }
+
+    public function setBanned(bool $banned): static
+    {
+        $this->banned = $banned;
+
+        return $this;
+    }
+
+
 
 
 
