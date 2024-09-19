@@ -6,8 +6,11 @@ namespace App\Controller;
 
 use App\Entity\Game;
 use App\Entity\User;
+use App\Entity\Wishlist;
+use App\Form\GameType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Doctrine\Persistence\ManagerRegistry;
@@ -90,27 +93,29 @@ class DashboardController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/games/remove/{id}', name: 'game_remove')]
-    public function removeGame(int $id,EntityManagerInterface $entityManager): Response
-    {   $user=$this->getUser();
-        if(!$user)
-        {
-            return $this->redirectToRoute('app_login');
-        }
-        if (!in_array('ROLE_ADMIN', $user->getRoles()))
-            return $this->redirectToRoute('home');
-       $gameRepository=$entityManager->getRepository(Game::class);
-       $game=$gameRepository->findOneBy(['id'=>$id]);
-       if (!$game) {
-           $this->addFlash('error', 'Game not found.');
-           return $this->redirectToRoute('game_management');
-       }
-       $entityManager->remove($game);
-       $entityManager->flush();
-       $this->addFlash('success', 'Game successfully removed.');
-       return $this->redirectToRoute('game_management');
-    }
+    #[Route('/admin/game/edit/{id}', name: 'game_edit')]
+    public function editGame(int $id, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $game = $entityManager->getRepository(Game::class)->find($id);
 
+        if (!$game) {
+            $this->addFlash('error', 'Game not found.');
+            return $this->redirectToRoute('game_management');
+        }
+
+        $form = $this->createForm(GameType::class, $game);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+            $this->addFlash('success', 'Game updated successfully.');
+            return $this->redirectToRoute('game_management');
+        }
+
+        return $this->render('admin/edit_game.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
 
 
 }

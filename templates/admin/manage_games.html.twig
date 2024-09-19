@@ -21,7 +21,7 @@
             <td>{{ game.genre }}</td>
             <td>{{ game.price }}</td>
             <td>
-                <a href="{{ path('game_remove', {'id': game.id}) }}">Remove game</a>
+                <a href="{{ path('game_edit', {'id': game.id}) }}">Edit game</a>
             </td>
         </tr>
     {% endfor %}
