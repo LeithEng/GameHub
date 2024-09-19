@@ -4,6 +4,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Game;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -72,5 +73,44 @@ class DashboardController extends AbstractController
         $this->addFlash('success', 'User successfully banned.');
         return $this->redirectToRoute('user_management');
     }
+
+    #[Route('/admin/games', name: 'game_management')]
+    public function manageGames(ManagerRegistry $doctrine): Response
+    {
+        $user=$this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if (!in_array('ROLE_ADMIN', $user->getRoles()))
+            return $this->redirectToRoute('home');
+        $entityManager = $doctrine->getManager();
+        $gameRepository=$entityManager->getRepository(Game::class);
+        $games = $gameRepository->findAll();
+        return $this->render('admin/manage_games.html.twig', [
+            'games' => $games,
+        ]);
+    }
+
+    #[Route('/admin/games/remove/{id}', name: 'game_remove')]
+    public function removeGame(int $id,EntityManagerInterface $entityManager): Response
+    {   $user=$this->getUser();
+        if(!$user)
+        {
+            return $this->redirectToRoute('app_login');
+        }
+        if (!in_array('ROLE_ADMIN', $user->getRoles()))
+            return $this->redirectToRoute('home');
+       $gameRepository=$entityManager->getRepository(Game::class);
+       $game=$gameRepository->findOneBy(['id'=>$id]);
+       if (!$game) {
+           $this->addFlash('error', 'Game not found.');
+           return $this->redirectToRoute('game_management');
+       }
+       $entityManager->remove($game);
+       $entityManager->flush();
+       $this->addFlash('success', 'Game successfully removed.');
+       return $this->redirectToRoute('game_management');
+    }
+
+
 
 }
