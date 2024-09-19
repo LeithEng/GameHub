@@ -5,6 +5,7 @@
 namespace App\Controller;
 
 use App\Entity\Game;
+use App\Entity\Review;
 use App\Entity\User;
 use App\Entity\Wishlist;
 use App\Form\GameType;
@@ -117,5 +118,70 @@ class DashboardController extends AbstractController
         ]);
     }
 
+
+    #[Route('/admin/upload-game', name: 'add_game')]
+    public function addGame(Request $request, EntityManagerInterface $entityManager)
+    {
+        $game = new Game();
+        $form = $this->createForm(GameType::class, $game);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+
+            $entityManager->persist($game);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Game successfully uploaded!');
+
+            return $this->redirectToRoute('game_management');
+        }
+
+        return $this->render('admin/add_game.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/admin/reviews', name: 'review_management')]
+    public function manageReviews(ManagerRegistry $doctrine): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+        if (!in_array('ROLE_ADMIN', $user->getRoles())) {
+            return $this->redirectToRoute('home');
+        }
+        $entityManager = $doctrine->getManager();
+        $reviewRepository = $entityManager->getRepository(Review::class);
+        $reviews = $reviewRepository->findAll();
+        return $this->render('admin/manage_reviews.html.twig', [
+            'reviews' => $reviews,
+        ]);
+    }
+    #[Route('/admin/review/delete/{id}', name: 'review_delete')]
+    public function deleteReview(int $id, ManagerRegistry $doctrine): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+        if (!in_array('ROLE_ADMIN', $user->getRoles())) {
+            return $this->redirectToRoute('home');
+        }
+
+        $entityManager = $doctrine->getManager();
+        $reviewRepository = $entityManager->getRepository(Review::class);
+        $review = $reviewRepository->find($id);
+        if (!$review) {
+            $this->addFlash('error', 'Review not found.');
+            return $this->redirectToRoute('review_management');
+        }
+        $entityManager->remove($review);
+        $entityManager->flush();
+        $this->addFlash('success', 'Review successfully deleted.');
+        return $this->redirectToRoute('review_management');
+    }
 
 }

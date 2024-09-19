@@ -7,7 +7,7 @@
             <thead>
             <tr>
                 <th>Game</th>
-                <th>Price</th>
+                <th>Price (in euros)</th>
             </tr>
             </thead>
             <tbody>
@@ -19,7 +19,7 @@
             {% endfor %}
             </tbody>
         </table>
-        <h1>Total price: {{ totalPrice }}</h1>
+        <h1>Total price in euros: {{ totalPrice }}</h1>
         <a href="{{ path('payment') }}" class="btn btn-primary">Proceed to payment</a>
     {% else %}
         <p>Your cart is empty.</p>

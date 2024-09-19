@@ -13,17 +13,17 @@ class GameType extends AbstractType
 {
 public function buildForm(FormBuilderInterface $builder, array $options): void
 {
-$builder
-->add('title', TextType::class)
-->add('releasedate', DateType::class, [
-'widget' => 'single_text',
-'format' => 'yyyy-MM-dd',
-])
-->add('publisher', TextType::class)
-->add('genre', TextType::class)
-->add('price', MoneyType::class, [
-'currency' => 'USD',
-]);
+    $builder
+        ->add('title', TextType::class)
+        ->add('releasedate', DateType::class)
+        ->add('publisher', TextType::class)
+        ->add('genre', TextType::class)
+        ->add('price', TextType::class)
+        ->add('description', TextType::class)
+        ->add('image', TextType::class, [
+            'label' => 'Game Cover Image (url)',
+            'required' => true,
+        ]);
 }
 
 public function configureOptions(OptionsResolver $resolver): void
