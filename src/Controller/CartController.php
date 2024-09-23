@@ -104,8 +104,9 @@ class CartController extends AbstractController
     public function payment(Request $request, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
-        $wallet=$user->getWallet();
+        $wallet = $user->getWallet();
         $cart = $entityManager->getRepository(Cart::class)->findOneBy(['user' => $user]);
+
         if (!$cart) {
             $this->addFlash('error', 'Cart not found');
             return $this->redirectToRoute('cart');
@@ -113,21 +114,37 @@ class CartController extends AbstractController
 
         $library = $entityManager->getRepository(Library::class)->findOneBy(['user' => $user]);
         $items = $entityManager->getRepository(CartItem::class)->findBy(['cart' => $cart]);
-        $totalPrice = array_reduce($items, function ($carry, $item) {
-            return $carry + $item->getGame()->getPrice();
-        }, 0);
+
+        $totalPrice = 0;
+        foreach ($items as $item) {
+            $game = $item->getGame();
+            if (!$library->getGames()->contains($game)) {
+                $totalPrice += $game->getPrice();
+            } else {
+
+                $this->addFlash('error', 'You already own the game "' . $game->getTitle() . '" and cannot purchase it again.');
+            }
+        }
+
+
+        if ($totalPrice == 0) {
+            return $this->redirectToRoute('cart');
+        }
+
         if (bccomp($wallet->getBalance(), $totalPrice, 2) < 0) {
             $this->addFlash('error', 'Insufficient funds. Please add more money to your wallet.');
             return $this->redirectToRoute('payment_failed');
         }
+
         $newBalance = bcsub($wallet->getBalance(), $totalPrice, 2);
         $wallet->setBalance($newBalance);
+
         foreach ($items as $item) {
             $game = $item->getGame();
             if (!$library->getGames()->contains($game)) {
                 $library->addGame($game);
                 $game->incrementPurchases();
-                $purchase=new Purchase();
+                $purchase = new Purchase();
                 $purchase->setUser($user);
                 $purchase->setGame($game);
                 $purchase->setPurchaseDate(new \DateTime('now'));
@@ -136,13 +153,13 @@ class CartController extends AbstractController
             }
             $cart->removeCartItem($item);
             $entityManager->remove($item);
-
         }
 
         $entityManager->flush();
 
         return $this->redirectToRoute('payment_success');
     }
+
     #[Route('/payment/success', name: 'payment_success')]
     public function paymentSuccess(): Response
     {

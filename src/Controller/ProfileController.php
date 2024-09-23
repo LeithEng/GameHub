@@ -2,6 +2,7 @@
 namespace App\Controller;
 
 use App\Entity\Library;
+use App\Entity\Purchase;
 use App\Entity\User;
 use App\Form\ChangePasswordType;
 use App\Repository\UserRepository;
@@ -79,5 +80,6 @@ class ProfileController extends AbstractController
             'email' => $email,
         ]);
     }
+
 
 }

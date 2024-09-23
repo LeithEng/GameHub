@@ -3,17 +3,19 @@
 {% block body %}
     {% include ('navbar/navbar.html.twig' )%}
     <h1>Your Cart</h1>
-    {% if message is not empty %}
-        <div class="alert alert-info">
-            {{ message }}
+    {% for label, messages in app.flashes %}
+        <div class="flash-message flash-{{ label }}">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
         </div>
-    {% endif %}
+    {% endfor %}
     {% if items is not empty %}
         <table>
             <thead>
             <tr>
                 <th>Game</th>
-                <th>Price (in euros)</th>
+                <th>Price</th>
                 <th>Action</th>
             </tr>
             </thead>
