@@ -1,13 +1,10 @@
 <?php
 
-
-
 namespace App\Controller;
-
 use App\Entity\Game;
+use App\Entity\Purchase;
 use App\Entity\Review;
 use App\Entity\User;
-use App\Entity\Wishlist;
 use App\Form\GameType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,7 +12,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Doctrine\Persistence\ManagerRegistry;
-
 
 class DashboardController extends AbstractController
 {
@@ -71,10 +67,47 @@ class DashboardController extends AbstractController
             $this->addFlash('error', 'You cannot ban this user.');
             return $this->redirectToRoute('user_management');
         }
+        if($person->isBanned())
+        {
+            $this->addFlash('error', 'This user is already banned.');
+            return $this->redirectToRoute('user_management');
+        }
         $person->setBanned(true);
         $entityManager->persist($person);
         $entityManager->flush();
         $this->addFlash('success', 'User successfully banned.');
+        return $this->redirectToRoute('user_management');
+    }
+
+    #[Route('/admin/users/unban/{id}', name: 'user_unban')]
+    public function unbanUsers(int $id,EntityManagerInterface $entityManager): Response
+    {   $user=$this->getUser();
+        if(!$user)
+        {
+            return $this->redirectToRoute('app_login');
+        }
+        if (!in_array('ROLE_ADMIN', $user->getRoles()))
+            return $this->redirectToRoute('home');
+        $userRepository = $entityManager->getRepository(User::class);
+        $person=$userRepository->findOneBy(['id'=>$id]);
+        if (!$person) {
+            $this->addFlash('error', 'User not found.');
+            return $this->redirectToRoute('user_management');
+        }
+        if(in_array('ROLE_ADMIN', $person->getRoles()))
+        {
+            $this->addFlash('error', 'You cannot ban this user.');
+            return $this->redirectToRoute('user_management');
+        }
+        if(!$person->isBanned())
+        {
+            $this->addFlash('error', 'This user is not banned.');
+            return $this->redirectToRoute('user_management');
+        }
+        $person->setBanned(false);
+        $entityManager->persist($person);
+        $entityManager->flush();
+        $this->addFlash('success', 'Ban removed successfully.');
         return $this->redirectToRoute('user_management');
     }
 
@@ -120,7 +153,7 @@ class DashboardController extends AbstractController
 
 
     #[Route('/admin/upload-game', name: 'add_game')]
-    public function addGame(Request $request, EntityManagerInterface $entityManager)
+    public function addGame(Request $request, EntityManagerInterface $entityManager): Response
     {
         $game = new Game();
         $form = $this->createForm(GameType::class, $game);
@@ -183,5 +216,105 @@ class DashboardController extends AbstractController
         $this->addFlash('success', 'Review successfully deleted.');
         return $this->redirectToRoute('review_management');
     }
+
+    #[Route('/admin/game-stats', name: 'game_stats')]
+    public function showGameStats(EntityManagerInterface $entityManager): Response
+    {   $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+        if (!in_array('ROLE_ADMIN', $user->getRoles())) {
+            return $this->redirectToRoute('home');
+        }
+
+        $gameRepository=$entityManager->getRepository(Game::class);
+        $games = $gameRepository->findAll();
+
+        return $this->render('admin/game_stats.html.twig', [
+            'games' => $games,
+        ]);
+    }
+    #[Route('/admin/sales', name: 'admin_sales')]
+    public function sales(EntityManagerInterface $entityManager): Response
+    {   $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+        if (!in_array('ROLE_ADMIN', $user->getRoles())) {
+            return $this->redirectToRoute('home');
+        }
+        $purchaseRepository=$entityManager->getRepository(Purchase::class);
+        $sales = $purchaseRepository->findAll();
+        $totalRevenue = array_sum(array_map(function($purchase) {
+            return $purchase->getAmount();
+        }, $sales));
+
+        return $this->render('admin/sales.html.twig', [
+            'sales' => $sales,
+            'totalRevenue' => $totalRevenue,
+        ]);
+    }
+
+    #[Route('/admin/users/promote/{id}', name: 'user_promote')]
+    public function promoteUser(int $id, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        if (!in_array('ROLE_ADMIN', $user->getRoles())) {
+            return $this->redirectToRoute('home');
+        }
+
+        $userRepository = $entityManager->getRepository(User::class);
+        $person = $userRepository->find($id);
+
+        if (!$person) {
+            throw $this->createNotFoundException('User not found');
+        }
+
+        $roles = $person->getRoles();
+        if (!in_array('ROLE_ADMIN', $roles)) {
+            $roles[] = 'ROLE_ADMIN';
+            $person->setRoles($roles);
+        }
+
+        $entityManager->flush();
+
+        $this->addFlash('success', 'User promoted to admin.');
+        return $this->redirectToRoute('user_management');
+    }
+    #[Route('/admin/users/demote/{id}', name: 'user_demote')]
+    public function demoteUser(int $id, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        if (!in_array('ROLE_ADMIN', $user->getRoles())) {
+            return $this->redirectToRoute('home');
+        }
+
+        $userRepository = $entityManager->getRepository(User::class);
+        $person = $userRepository->find($id);
+
+        if (!$person) {
+            throw $this->createNotFoundException('User not found');
+        }
+
+        $roles = $person->getRoles();
+        if (($key = array_search('ROLE_ADMIN', $roles)) !== false) {
+            unset($roles[$key]);
+            $person->setRoles(array_values($roles)); // Re-index the array
+        }
+
+        $entityManager->flush();
+
+        $this->addFlash('success', 'User demoted from admin.');
+        return $this->redirectToRoute('user_management');
+    }
+
 
 }

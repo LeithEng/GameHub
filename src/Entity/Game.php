@@ -49,10 +49,24 @@ class Game
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'game', orphanRemoval: true)]
     private Collection $reviews;
 
+    #[ORM\Column]
+    private ?int $views = 0;
+
+    #[ORM\Column]
+    private ?int $purchases = 0;
+
+    /**
+     * @var Collection<int, Purchase>
+     */
+    #[ORM\OneToMany(targetEntity: Purchase::class, mappedBy: 'Game')]
+    private Collection $purchase;
+
+
     public function __construct()
     {
         $this->wishlists = new ArrayCollection();
         $this->reviews = new ArrayCollection();
+        $this->purchase = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -198,6 +212,67 @@ class Game
             // set the owning side to null (unless already changed)
             if ($review->getGame() === $this) {
                 $review->setGame(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getViews(): ?int
+    {
+        return $this->views;
+    }
+
+    public function setViews(int $views): static
+    {
+        $this->views = $views;
+
+        return $this;
+    }
+
+    public function getPurchases(): ?int
+    {
+        return $this->purchases;
+    }
+
+    public function setPurchases(int $purchases): static
+    {
+        $this->purchases = $purchases;
+
+        return $this;
+    }
+
+
+
+
+    public function incrementViews(): void { $this->views++; }
+
+    public function incrementPurchases(): void { $this->purchases++; }
+
+    /**
+     * @return Collection<int, Purchase>
+     */
+    public function getPurchase(): Collection
+    {
+        return $this->purchase;
+    }
+
+    public function addPurchase(Purchase $purchase): static
+    {
+        if (!$this->purchase->contains($purchase)) {
+            $this->purchase->add($purchase);
+            $purchase->setGame($this);
+        }
+
+        return $this;
+    }
+
+    public function removePurchase(Purchase $purchase): static
+    {
+        if ($this->purchase->removeElement($purchase)) {
+            // set the owning side to null (unless already changed)
+            if ($purchase->getGame() === $this) {
+                $purchase->setGame(null);
             }
         }
 

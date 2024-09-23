@@ -21,6 +21,8 @@ class GameController extends AbstractController
         if (!$game) {
             throw $this->createNotFoundException('The game does not exist.');
         }
+        $game->incrementViews();
+        $entityManager->flush();
 
 
         return $this->render('game/game.html.twig', [

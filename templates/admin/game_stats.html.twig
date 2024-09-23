@@ -1,0 +1,21 @@
+<h1>Game Statistics</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Title</th>
+        <th>Views</th>
+        <th>Purchases</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for game in games %}
+        <tr>
+            <td>{{ game.title }}</td>
+            <td>{{ game.views }}</td>
+            <td>{{ game.purchases }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ path('admin_dashboard') }}">Back to dashboard</a>

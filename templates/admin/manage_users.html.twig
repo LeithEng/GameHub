@@ -6,6 +6,8 @@
         <th>ID</th>
         <th>Username</th>
         <th>Email</th>
+        <th>Ban status</th>
+        <th>Admin Status</th>
         <th>Actions</th>
     </tr>
     </thead>
@@ -16,9 +18,33 @@
             <td>{{ user.username }}</td>
             <td>{{ user.email }}</td>
             <td>
-                <a href="{{ path('user_ban', {'id': user.id}) }}">Ban User</a>
+                {% if user.banned %}
+                    Banned
+                {% else %}
+                    Active
+                {% endif %}
+            </td>
+            <td>
+                {% if 'ROLE_ADMIN' in user.roles %}
+                    Admin
+                {% else %}
+                    User
+                {% endif %}
+            </td>
+            <td>
+                {% if user.banned %}
+                    <a href="{{ path('user_unban', {'id': user.id}) }}">Unban User</a>
+                {% else %}
+                    <a href="{{ path('user_ban', {'id': user.id}) }}">Ban User</a>
+                {% endif %}
+                {% if 'ROLE_ADMIN' not in user.roles %}
+                    <a href="{{ path('user_promote', {'id': user.id}) }}">Make Admin</a>
+                {% else %}
+                    <a href="{{ path('user_demote', {'id': user.id}) }}">Demote Admin</a>
+                {% endif %}
             </td>
         </tr>
     {% endfor %}
     </tbody>
 </table>
+<a href="{{ path('admin_dashboard') }}">Back to dashboard</a>

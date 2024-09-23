@@ -5,6 +5,7 @@ use App\Entity\Cart;
 use App\Entity\CartItem;
 use App\Entity\Game;
 use App\Entity\Library;
+use App\Entity\Purchase;
 use App\Entity\User;
 use App\Entity\Wallet;
 use Doctrine\ORM\EntityManagerInterface;
@@ -125,6 +126,13 @@ class CartController extends AbstractController
             $game = $item->getGame();
             if (!$library->getGames()->contains($game)) {
                 $library->addGame($game);
+                $game->incrementPurchases();
+                $purchase=new Purchase();
+                $purchase->setUser($user);
+                $purchase->setGame($game);
+                $purchase->setPurchaseDate(new \DateTime('now'));
+                $purchase->setAmount($game->getPrice());
+                $entityManager->persist($purchase);
             }
             $cart->removeCartItem($item);
             $entityManager->remove($item);

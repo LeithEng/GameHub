@@ -1,0 +1,25 @@
+<h1>Sales Report</h1>
+<p>Total Revenue: {{ totalRevenue }} </p>
+
+<table>
+    <thead>
+    <tr>
+        <th>User</th>
+        <th>Game</th>
+        <th>Date</th>
+        <th>Price</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for sale in sales %}
+        <tr>
+            <td>{{ sale.user.username }}</td>
+            <td>{{ sale.game.title }}</td>
+            <td>{{ sale.purchaseDate|date('Y-m-d H:i') }}</td>
+            <td>{{ sale.amount }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ path('admin_dashboard') }}">Back to dashboard</a>
