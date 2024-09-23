@@ -15,6 +15,12 @@ class WishlistController extends AbstractController
     public function showWishlist(EntityManagerInterface $entityManager):Response
     {
         $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $wishlist = $entityManager->getRepository(Wishlist::class)->findBy(['user' => $user]);
         return $this->render('wishlist/index.html.twig', ['wishlists' => $wishlist]);
     }
@@ -25,6 +31,12 @@ class WishlistController extends AbstractController
     public function addToWishlist(string $title, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $game = $entityManager->getRepository(Game::class)->findOneBy(['title' => $title]);
 
 
@@ -53,6 +65,12 @@ class WishlistController extends AbstractController
     public function removeFromWishlist(string $title, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $game = $entityManager->getRepository(Game::class)->findOneBy(['title' => $title]);
 
         if (!$game) {

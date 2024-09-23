@@ -14,7 +14,13 @@ class DebitCardController extends AbstractController
 {
     #[Route('/debitcard/addfunds', name: 'add_funds_to_wallet')]
     public function addFundsToWallet(Request $request, EntityManagerInterface $entityManager): Response
-    {
+    {   $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $form = $this->createForm(DebitCardType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {

@@ -15,6 +15,13 @@ class StoreController extends AbstractController
     #[Route('/store', name: 'app_store')]
     public function index(Request $request, GameRepository $gameRepository): Response
     {
+        $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $filters = [
             'genre' => $request->query->get('genre'),
             'publisher' => $request->query->get('publisher'),

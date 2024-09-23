@@ -11,7 +11,13 @@ class HomeController extends AbstractController
 {
     #[Route('/home', name: 'home')]
     public function index(GameRepository $gameRepository): Response
-    {
+    {   $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $randomGames = $gameRepository->findRandomGames(5);
         return $this->render('home/home.html.twig', [
             'controller_name' => 'HomeController',

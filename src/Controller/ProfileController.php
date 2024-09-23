@@ -19,6 +19,12 @@ class ProfileController extends AbstractController
     public function showProfile(Request $request, EntityManagerInterface $entityManager)
     {
         $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $username = $user->getUsername();
         $email = $user->getEmail();
         $wallet = $user->getWallet();
@@ -29,6 +35,12 @@ class ProfileController extends AbstractController
     public function changePassword(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher)
     {
         $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $form = $this->createForm(ChangePasswordType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -54,6 +66,12 @@ class ProfileController extends AbstractController
     public function showLibrary(EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $library = $entityManager->getRepository(Library::class)->findBy(['user' => $user]);
         $libraryGames=$library[0]->getGames();
 
@@ -64,7 +82,11 @@ class ProfileController extends AbstractController
 
     #[Route('/profile/{id}', name: 'profile_page')]
     public function checkProfile($id, UserRepository $userRepository)
-    {
+    {   $currentuser = $this->getUser();
+        if(!$currentuser)
+            return $this->redirectToRoute('app_login');
+        if (in_array('ROLE_ADMIN', $currentuser->getRoles()))
+            return $this->redirectToRoute('admin_dashboard');
         $user = $userRepository->find($id);
 
         if (!$user) {

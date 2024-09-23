@@ -18,7 +18,13 @@ class FriendshipController extends AbstractController
  #[Route(path:"/send-request/{username}", name:"send_request")]
 
 public function sendFriendRequest(string $username,EntityManagerInterface $entityManager): Response
-{
+{   $user = $this->getUser();
+    if(!$user)
+        return $this->redirectToRoute('app_login');
+    if(in_array('ROLE_ADMIN', $user->getRoles()))
+    {
+        return $this->redirectToRoute('admin_dashboard');
+    }
 $user1 = $this->getUser();
 $userRepository = $entityManager->getRepository(User::class);
 $user2= $userRepository->findOneBy(['username' => $username]);
@@ -45,7 +51,13 @@ return new Response('Friend request sent successfully!');
 
 #[Route(path:"/accept-request/{username}", name:"accept_request")]
 public function acceptFriendRequest(string $username, EntityManagerInterface $entityManager): Response
-{
+{   $user = $this->getUser();
+    if(!$user)
+        return $this->redirectToRoute('app_login');
+    if(in_array('ROLE_ADMIN', $user->getRoles()))
+    {
+        return $this->redirectToRoute('admin_dashboard');
+    }
     $user2 = $this->getUser();
     $friendship = $entityManager->getRepository(Friendship::class)
         ->findOneBy([
@@ -65,10 +77,15 @@ public function acceptFriendRequest(string $username, EntityManagerInterface $en
 
     #[Route(path:"/reject-request/{username}", name:"reject_request")]
     public function rejectFriendRequest(string $username, EntityManagerInterface $entityManager): Response
-    {
-        $user2 = $this->getUser(); // The current authenticated user
+    {   $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
 
-        // Fetch the friendship based on the username and current user
+        $user2 = $this->getUser();
         $friendship = $entityManager->getRepository(Friendship::class)
             ->findOneBy([
                 'user2' => $user2,
@@ -88,7 +105,13 @@ public function acceptFriendRequest(string $username, EntityManagerInterface $en
 
 #[Route(path:"/friends", name:"friends")]
 public function Friends(EntityManagerInterface $entityManager, Request $request, UserRepository $userRepository): Response
-{   $user=$this->getUser();
+{   $user = $this->getUser();
+    if(!$user)
+        return $this->redirectToRoute('app_login');
+    if(in_array('ROLE_ADMIN', $user->getRoles()))
+    {
+        return $this->redirectToRoute('admin_dashboard');
+    }
     $repository = $entityManager->getRepository(Friendship::class);
 
     $queryBuilder = $repository->createQueryBuilder('f')

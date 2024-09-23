@@ -20,6 +20,12 @@ class CartController extends AbstractController
     public function addToCart(string $title, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $cart = $entityManager->getRepository(Cart::class)->findOneBy(['user' => $user]);
 
         if (!$cart) {
@@ -56,6 +62,12 @@ class CartController extends AbstractController
     public function removeFromCart(string $title, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $cart = $entityManager->getRepository(Cart::class)->findOneBy(['user' => $user]);
         $game = $entityManager->getRepository(Game::class)->findOneBy(['title'=>$title]);
         $gameId = $game->getId();
@@ -69,6 +81,12 @@ class CartController extends AbstractController
     public function showCart(EntityManagerInterface $entityManager, Request $request): Response
     {
         $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $cart = $entityManager->getRepository(Cart::class)->findOneBy(['user' => $user]);
         $id=$cart->getId();
         $items = $entityManager->getRepository(CartItem::class)->findBy(['cart' => $id]);
@@ -81,6 +99,12 @@ class CartController extends AbstractController
     public function checkout(EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $cart = $entityManager->getRepository(Cart::class)->findOneBy(['user' => $user]);
 
         if (!$cart) {
@@ -104,6 +128,12 @@ class CartController extends AbstractController
     public function payment(Request $request, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $wallet = $user->getWallet();
         $cart = $entityManager->getRepository(Cart::class)->findOneBy(['user' => $user]);
 
@@ -162,14 +192,26 @@ class CartController extends AbstractController
 
     #[Route('/payment/success', name: 'payment_success')]
     public function paymentSuccess(): Response
-    {
+    {   $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         return $this->render('cart/payment_success.html.twig', [
             'message' => 'Payment successful! Thank you for your purchase.',
         ]);
     }
     #[Route('/payment/failed', name: 'payment_failed')]
     public function paymentFailed(): Response
-    {
+    {   $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         return $this->render('cart/payment_failed.html.twig', [
         ]);
     }

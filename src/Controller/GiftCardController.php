@@ -15,6 +15,13 @@ class GiftCardController extends AbstractController
     #[Route('/redeem-gift-card', name: 'redeem_gift_card')]
     public function redeemGiftCard(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $form = $this->createForm(GiftCardType::class);
         $form->handleRequest($request);
 

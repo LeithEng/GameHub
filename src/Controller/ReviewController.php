@@ -17,6 +17,12 @@ class ReviewController extends AbstractController
     public function addReview(string $title, Request $request, EntityManagerInterface $entityManager): Response
     {   $game=$entityManager->getRepository(Game::class)->findOneBy(['title'=>$title]);
         $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
 
         $existingReview = $entityManager->getRepository(Review::class)->findOneBy([
             'user' => $user,
@@ -51,7 +57,13 @@ class ReviewController extends AbstractController
 
     #[Route('/game/{title}/review/{id}/edit', name: 'edit_review')]
     public function editReview(string $title, int $id, Request $request, EntityManagerInterface $entityManager): Response
-    {
+    {   $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $game = $entityManager->getRepository(Game::class)->findOneBy(['title' => $title]);
         $review = $entityManager->getRepository(Review::class)->find($id);
 
@@ -78,7 +90,13 @@ class ReviewController extends AbstractController
 
     #[Route('/game/{title}/review/{id}/delete', name: 'delete_review')]
     public function deleteReview(string $title, int $id, EntityManagerInterface $entityManager): Response
-    {
+    {   $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $review = $entityManager->getRepository(Review::class)->find($id);
 
         if (!$review || $review->getUser() !== $this->getUser()) {

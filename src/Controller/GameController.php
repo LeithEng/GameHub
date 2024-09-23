@@ -14,7 +14,13 @@ class GameController extends AbstractController
 {
     #[Route('/game/{title}', name: 'app_game')]
     public function showGameDetails(string $title, EntityManagerInterface $entityManager): Response
-    {
+    {   $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
 
         $game = $entityManager->getRepository(Game::class)->findOneBy(['title' => $title]);
 
@@ -32,7 +38,13 @@ class GameController extends AbstractController
     }
     #[Route('/search', name: 'search_games')]
     public function search(Request $request, GameRepository $gameRepository): Response
-    {
+    {   $user = $this->getUser();
+        if(!$user)
+            return $this->redirectToRoute('app_login');
+        if(in_array('ROLE_ADMIN', $user->getRoles()))
+        {
+            return $this->redirectToRoute('admin_dashboard');
+        }
         $query = $request->query->get('query');
         $games = [];
 
